@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model categories {
+  id            Int             @id(map: "PK_24dbc6126a28ff948da33e97d3b") @default(autoincrement())
+  name          String          @db.VarChar
+  subcategories subcategories[]
+  typeId        Int
+  type          type            @relation(fields: [typeId], references: [id])
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+}
+
+model expenses {
+  id            String        @id(map: "PK_94c3ceb17e3140abc9282c20610") @db.VarChar
+  name          String        @db.VarChar
+  date          DateTime      @db.Timestamp(6)
+  idsubcategory Int
+  idpaymentType Int
+  idgroup       String        @db.VarChar
+  created_at    DateTime      @default(now()) @db.Timestamp(6)
+  updated_at    DateTime      @updatedAt @db.Timestamp(6)
+  amount        Decimal       @db.Decimal
+  groups        groups        @relation(fields: [idgroup], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_cfab5328d823fb691df3141932f")
+  paymentTypes  paymentTypes  @relation(fields: [idpaymentType], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_52e3b87e43c1211fc98dd5c8b81")
+  subcategories subcategories @relation(fields: [idsubcategory], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_9d4d3dfa8a2af311461180810b6")
+
+}
+
+model groups {
+  id         String     @id(map: "PK_659d1483316afb28afd3a90646e") @db.VarChar
+  name       String     @db.VarChar
+  created_at DateTime   @default(now()) @db.Timestamp(6)
+  updated_at DateTime   @updatedAt @db.Timestamp(6)
+  expenses   expenses[]
+  incomes    incomes[]
+  users      users[]
+}
+
+model incomes {
+  id            String        @id(map: "PK_d737b3d0314c1f0da5461a55e5e") @db.VarChar
+  name          String        @db.VarChar
+  idgroup       String        @db.VarChar
+  idsubcategory Int
+  created_at    DateTime      @default(now()) @db.Timestamp(6)
+  updated_at    DateTime      @updatedAt @db.Timestamp(6)
+  groups        groups        @relation(fields: [idgroup], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_c860f0694a53309938930fbd845")
+  subcategories subcategories @relation(fields: [idsubcategory], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_138b02a72514a488cc2619c9a4c")
+}
+
+model migrations {
+  id        Int    @id(map: "PK_8c82d7f526340ab734260ea46be") @default(autoincrement())
+  timestamp BigInt
+  name      String @db.VarChar
+}
+
+model paymentTypes {
+  id         Int        @id(map: "PK_0171f8b6d91e784ea6a4f9ca2cc") @default(autoincrement())
+  name       String     @unique @db.VarChar
+  expenses   expenses[]
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+}
+
+model subcategories {
+  id         Int        @id(map: "PK_793ef34ad0a3f86f09d4837007c") @default(autoincrement())
+  name       String     @db.VarChar
+  idcategory Int
+  categories categories @relation(fields: [idcategory], references: [id], onDelete: NoAction, map: "FK_33dae99d35af81934dd31982b98")
+  expenses   expenses[]
+  incomes    incomes[]
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model typeorm_metadata {
+  type     String  @db.VarChar
+  database String? @db.VarChar
+  schema   String? @db.VarChar
+  table    String? @db.VarChar
+  name     String? @db.VarChar
+  value    String?
+
+  @@ignore
+}
+
+model users {
+  id         String   @db.VarChar
+  idgroup    String   @db.VarChar
+  name       String   @db.VarChar
+  email      String   @db.VarChar
+  password   String   @db.VarChar
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @updatedAt @db.Timestamp(6)
+  avatar     String   @db.VarChar
+  groups     groups   @relation(fields: [idgroup], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_01f95813e804ad7fc054822fbef")
+
+  @@id([id, idgroup], map: "PK_3577a50ccaa5d9b7d93967f71a7")
+}
+
+model type {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  categories categories[]
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  @@map("types")
+}
