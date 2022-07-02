@@ -9,7 +9,7 @@ datasource db {
 
 model categories {
   id            Int             @id(map: "PK_24dbc6126a28ff948da33e97d3b") @default(autoincrement())
-  name          String          @db.VarChar
+  name          String          @unique @db.VarChar
   subcategories subcategories[]
   typeId        Int
   type          type            @relation(fields: [typeId], references: [id])
@@ -70,7 +70,7 @@ model paymentTypes {
 
 model subcategories {
   id         Int        @id(map: "PK_793ef34ad0a3f86f09d4837007c") @default(autoincrement())
-  name       String     @db.VarChar
+  name       String     @unique @db.VarChar
   idcategory Int
   categories categories @relation(fields: [idcategory], references: [id], onDelete: NoAction, map: "FK_33dae99d35af81934dd31982b98")
   expenses   expenses[]
