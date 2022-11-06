@@ -7,9 +7,9 @@ type subCategoryProps = {
 
 export async function getSubcategories(categoryId: number) {
   try {
-    return prisma.subcategories.findMany({
+    return prisma.subcategory.findMany({
       where: {
-        idcategory: categoryId,
+        categoryId,
       },
     });
   } catch (error) {
@@ -18,10 +18,10 @@ export async function getSubcategories(categoryId: number) {
 }
 export async function createSubcategory(subcategory: subCategoryProps) {
   try {
-    const subcategoryFound = await prisma.subcategories.findMany({
+    const subcategoryFound = await prisma.subcategory.findMany({
       where: {
         name: subcategory.name,
-        idcategory: subcategory.categoryId,
+        categoryId: subcategory.categoryId,
       },
     });
 
@@ -29,10 +29,10 @@ export async function createSubcategory(subcategory: subCategoryProps) {
       throw new Error("subcategory already exists");
     }
 
-    return prisma.subcategories.create({
+    return prisma.subcategory.create({
       data: {
         name: subcategory.name,
-        idcategory: subcategory.categoryId,
+        categoryId: subcategory.categoryId,
       },
     });
   } catch (error) {

@@ -4,26 +4,35 @@ import { getMonth, startOfMonth, endOfMonth } from "date-fns";
 type createOutcomeProps = {
   amount: number;
   date: Date;
-  name: string;
+  description: string;
   idpaymentType: number;
   idsubcategory: number;
   idgroup?: string;
+  dueDate: Date;
 };
 
 export async function createOutcome(createOutcome: createOutcomeProps) {
   console.log(createOutcome);
   try {
-    const { amount, date, name, idsubcategory, idpaymentType, idgroup } =
-      createOutcome;
-    return prisma.expenses.create({
+    const {
+      amount,
+      dueDate,
+      description,
+      idsubcategory,
+      idpaymentType,
+      idgroup,
+    } = createOutcome;
+    return prisma.expense.create({
       data: {
-        id: uuid(),
         amount,
-        date,
-        name,
-        idpaymentType,
-        idsubcategory,
-        idgroup,
+        dueDate,
+        description,
+        status: "open",
+        expenseOf: "Alex",
+        subcategoryId: idsubcategory,
+        bankAccountId: "",
+        groupId: "",
+        paymentTypeId: 1,
       },
     });
   } catch (error) {
@@ -34,20 +43,20 @@ export async function createOutcome(createOutcome: createOutcomeProps) {
 export async function getOutcomeByMonth(month: Date) {
   const firstDay = startOfMonth(month);
   const endDay = endOfMonth(month);
-  return prisma.categories.findMany({
+  return prisma.category.findMany({
     include: {
-      subcategories: {
+      Subcategory: {
         include: {
-          expenses: true,
+          Expense: true,
         },
       },
     },
     where: {
-      subcategories: {
+      Subcategory: {
         every: {
-          expenses: {
+          Expense: {
             every: {
-              date: {
+              dueDate: {
                 gte: firstDay,
                 lte: endDay,
               },

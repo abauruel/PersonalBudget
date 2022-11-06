@@ -1,153 +1,149 @@
 import { PrismaClient } from "@prisma/client";
-
+import {
+  subcategoryDebts,
+  subcategoryEducation,
+  subcategoryHabitationNames,
+  subcategoryHealth,
+  subcategoryLeisure,
+  subcategoryOthers,
+  subcategoryPersonalExpenses,
+  subcategoryTransportation,
+} from "./seedSubcategories";
 const prisma = new PrismaClient();
 
 async function main() {
-  const income = await prisma.type.upsert({
-    where: { name: "income" },
+  const despesasEssenciais = await prisma.costCenter.upsert({
+    where: { name: "despesas essenciais" },
     update: {},
     create: {
-      name: "income",
-    },
-  });
-  const outcome = await prisma.type.upsert({
-    where: { name: "outcome" },
-    update: {},
-    create: {
-      name: "outcome",
+      name: "despesas essenciais",
     },
   });
 
-  const DespesasEssenciais = await prisma.categories.upsert({
-    where: {
-      name: "Despesas Essenciais",
-    },
+  const gastosLivres = await prisma.costCenter.upsert({
+    where: { name: "gastos livres" },
     update: {},
     create: {
-      name: "Despesas Essenciais",
-      typeId: income.id,
-    },
-  });
-  const DespesasEducacao = await prisma.categories.upsert({
-    where: {
-      name: "Despesas Educação",
-    },
-    update: {},
-    create: {
-      name: "Despesas Educação",
-      typeId: income.id,
-    },
-  });
-  const GastosLivres = await prisma.categories.upsert({
-    where: {
-      name: "Gastos livres",
-    },
-    update: {},
-    create: {
-      name: "Gastos livres",
-      typeId: income.id,
-    },
-  });
-  const BoletoPessoal = await prisma.categories.upsert({
-    where: {
-      name: "Boleto Pessoal",
-    },
-    update: {},
-    create: {
-      name: "Boleto Pessoal",
-      typeId: income.id,
+      name: "gastos livres",
     },
   });
 
-  // subcategories
-  const habitacao = await prisma.subcategories.upsert({
-    where: {
-      name: "Habitação",
-    },
+  const despesasEducacao = await prisma.costCenter.upsert({
+    where: { name: "despesas educação" },
     update: {},
     create: {
-      name: "Habitação",
-      idcategory: DespesasEssenciais.id,
+      name: "despesas educação",
     },
   });
-  const dividas = await prisma.subcategories.upsert({
-    where: {
-      name: "Dívidas",
-    },
+  const boletoPessoal = await prisma.costCenter.upsert({
+    where: { name: "boleto pessoal" },
     update: {},
     create: {
-      name: "Dívidas",
-      idcategory: DespesasEssenciais.id,
-    },
-  });
-  const saude = await prisma.subcategories.upsert({
-    where: {
-      name: "Saúde",
-    },
-    update: {},
-    create: {
-      name: "Saúde",
-      idcategory: DespesasEssenciais.id,
-    },
-  });
-  const transporte = await prisma.subcategories.upsert({
-    where: {
-      name: "Transporte",
-    },
-    update: {},
-    create: {
-      name: "Transporte",
-      idcategory: DespesasEssenciais.id,
-    },
-  });
-  const despesasPessoais = await prisma.subcategories.upsert({
-    where: {
-      name: "Despesas pessoais",
-    },
-    update: {},
-    create: {
-      name: "Despesas pessoais",
-      idcategory: DespesasEssenciais.id,
+      name: "boleto pessoal",
     },
   });
 
-  const educacao = await prisma.subcategories.upsert({
-    where: {
-      name: "Educação",
-    },
-    update: {},
-    create: {
-      name: "Educação",
-      idcategory: DespesasEducacao.id,
-    },
+  const personalExpense = await seedCategories(
+    despesasEssenciais.id,
+    "Despesas pessoais"
+  );
+  for (const name of subcategoryPersonalExpenses) {
+    await seedSubCategory({ categoryId: personalExpense.id, name });
+  }
+
+  const habitacao = await seedCategories(despesasEssenciais.id, "Habitação");
+  for (const name of subcategoryHabitationNames) {
+    await seedSubCategory({ categoryId: habitacao.id, name });
+  }
+
+  const debt = await seedCategories(despesasEssenciais.id, "Dívidas");
+  for (const name of subcategoryDebts) {
+    await seedSubCategory({ categoryId: debt.id, name });
+  }
+
+  const health = await seedCategories(despesasEssenciais.id, "Saúde");
+  for (const name of subcategoryHealth) {
+    await seedSubCategory({ categoryId: health.id, name });
+  }
+
+  const transportation = await seedCategories(
+    despesasEssenciais.id,
+    "Transporte"
+  );
+  for (const name of subcategoryTransportation) {
+    await seedSubCategory({ categoryId: transportation.id, name });
+  }
+
+  const education = await seedCategories(despesasEducacao.id, "Educação");
+  for (const name of subcategoryEducation) {
+    await seedSubCategory({ categoryId: education.id, name });
+  }
+
+  const leisure = await seedCategories(gastosLivres.id, "Lazer");
+  for (const name of subcategoryLeisure) {
+    await seedSubCategory({ categoryId: leisure.id, name });
+  }
+  const others = await seedCategories(gastosLivres.id, "Outros");
+  for (const name of subcategoryOthers) {
+    await seedSubCategory({ categoryId: others.id, name });
+  }
+
+  const personalPaymentSlip = await seedCategories(
+    boletoPessoal.id,
+    "Boleto pessoal"
+  );
+  await seedSubCategory({
+    categoryId: personalPaymentSlip.id,
+    name: "METINHAZINHA ( Um jantar, um sapato, uma blusinha - 3 meses ) ",
   });
-  const lazer = await prisma.subcategories.upsert({
-    where: {
-      name: "Lazer",
-    },
-    update: {},
-    create: {
-      name: "Lazer",
-      idcategory: GastosLivres.id,
-    },
+  await seedSubCategory({
+    categoryId: personalPaymentSlip.id,
+    name: "METINHA ( Reserva de Emergência - 6 meses )",
   });
-  const outros = await prisma.subcategories.upsert({
-    where: {
-      name: "Outros",
-    },
-    update: {},
-    create: {
-      name: "Outros",
-      idcategory: GastosLivres.id,
-    },
+  await seedSubCategory({
+    categoryId: personalPaymentSlip.id,
+    name: "META ( Viagem Internacional - 1 ano )",
+  });
+  await seedSubCategory({
+    categoryId: personalPaymentSlip.id,
+    name: "METAZONA ( Aposentadoria - 30 anos )",
   });
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
+  .then(async () => {
     await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
   });
+
+async function seedCategories(costCenterId: number, name: string) {
+  const categories = await prisma.category.upsert({
+    where: { name },
+    update: {},
+    create: {
+      name,
+      costcenterid: costCenterId,
+    },
+  });
+  return categories;
+}
+type SubCategoryProps = {
+  categoryId: number;
+  name: string;
+};
+
+async function seedSubCategory({ categoryId, name }: SubCategoryProps) {
+  const categories = await prisma.subcategory.upsert({
+    where: { name },
+    update: {},
+    create: {
+      name,
+      categoryId,
+    },
+  });
+  return categories;
+}
